@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostDrift Research | 人文知と実装の境界線</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Noto+Serif+JP:wght@200;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Styles (Animation Keyframes & Performance Tuning) -->
+    <style>
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+        .font-serif { font-family: 'Noto Serif JP', serif; }
+
+        /* Performance Optimization: Tell browser what changes to expect */
+        .hardware-accelerated {
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        @keyframes sway-pine {
+            0% { transform: rotate(-1.5deg) translateX(-3px) skewX(0.5deg); }
+            100% { transform: rotate(1.5deg) translateX(3px) skewX(-0.5deg); }
+        }
+
+        @keyframes resonance-vivid {
+            0% { transform: scale(0.6); opacity: 0; stroke-width: 0.5px; }
+            20% { opacity: 0.5; stroke-width: 1.2px; }
+            100% { transform: scale(2.2); opacity: 0; stroke-width: 0.2px; }
+        }
+
+        @keyframes water-ripple {
+            0% { transform: scale(0); opacity: 0; stroke-width: 1.2px; }
+            10% { opacity: 0.5; }
+            100% { transform: scale(3.5); opacity: 0; stroke-width: 0.2px; }
+        }
+
+        @keyframes mist-slow {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(0%) translateY(5px); }
+            100% { transform: translateX(50%) translateY(0); }
+        }
+
+        .animate-sway-pine {
+            animation: sway-pine 12s ease-in-out infinite alternate;
+        }
+
+        .animate-resonance-vivid {
+            animation: resonance-vivid 12s cubic-bezier(0.2, 0, 0.4, 1) infinite;
+        }
+
+        .animate-water-ripple {
+            animation: water-ripple 6s cubic-bezier(0, 0.2, 0.4, 1) infinite;
+        }
+
+        .animate-mist-slow {
+            animation: mist-slow 25s ease-in-out infinite alternate;
+        }
+        
+        /* Mobile Menu Transitions */
+        .mobile-menu-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-20px);
+        }
+        .mobile-menu-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#F9F8F6] text-stone-900 font-sans selection:bg-stone-900 selection:text-white overflow-x-hidden w-full antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 mix-blend-difference px-6 md:px-12">
+        <div class="max-w-7xl mx-auto h-20 md:h-24 flex items-center justify-between">
+            <div class="flex items-center gap-4 group cursor-pointer z-50">
+                <div class="w-px h-6 md:h-8 bg-stone-300 group-hover:h-10 transition-all duration-700"></div>
+                <span class="font-serif tracking-[0.3em] md:tracking-[0.5em] text-xs md:text-sm text-stone-500 uppercase">GhostDrift</span>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-16 text-[10px] font-bold tracking-[0.3em] text-stone-400 uppercase">
+                <a href="#concept" class="hover:text-stone-900 transition-colors">Concept</a>
+                <a href="#examples" class="hover:text-stone-900 transition-colors">Examples</a>
+                <a href="#cycle" class="hover:text-stone-900 transition-colors">Cycle</a>
+                <a 
+                    href="https://www.ghostdriftresearch.com/%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-8 py-2 border border-stone-200 text-stone-400 hover:border-stone-900 hover:text-stone-900 transition-all duration-1000 inline-block"
+                >
+                    Turn PhD Humanities into Claims
+                </a>
+            </div>
+
+            <!-- Mobile Hamburger Button (Increased touch target) -->
+            <button id="menu-btn" class="md:hidden text-stone-400 z-50 focus:outline-none p-2 -mr-2">
+                <i data-lucide="menu" id="icon-menu"></i>
+                <i data-lucide="x" id="icon-close" class="hidden"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="fixed inset-0 bg-[#F9F8F6]/95 backdrop-blur-sm z-40 flex flex-col items-center justify-center gap-8 transition-all duration-500 ease-in-out md:hidden mobile-menu-hidden">
+            <a href="#concept" class="mobile-link text-xl font-serif text-stone-900 font-bold p-4">Concept</a>
+            <a href="#examples" class="mobile-link text-xl font-serif text-stone-900 font-bold p-4">Examples</a>
+            <a href="#cycle" class="mobile-link text-xl font-serif text-stone-900 font-bold p-4">Cycle</a>
+            <a 
+                href="https://www.ghostdriftresearch.com/%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="mobile-link px-8 py-4 border border-stone-900 text-stone-900 font-bold uppercase tracking-widest text-xs"
+            >
+                Turn PhD Humanities into Claims
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="relative min-h-screen flex items-center justify-center pt-24 md:pt-32 pb-20 overflow-hidden w-full">
+            <!-- Atmosphere -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden bg-[#F9F8F6]">
+                <div class="absolute top-[10%] left-[5%] md:top-[20%] md:left-[15%]">
+                    <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated md:w-[120px] md:h-[120px]" style="width: 80px; height: 80px; animation-delay: 1s;"></div>
+                </div>
+                <div class="absolute bottom-[20%] right-[10%] md:bottom-[30%] md:right-[20%]">
+                    <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated md:w-[180px] md:h-[180px]" style="width: 100px; height: 100px; animation-delay: 0s;"></div>
+                </div>
+
+                <div class="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2">
+                    <div class="absolute border border-stone-400/30 rounded-full animate-resonance-vivid hardware-accelerated md:w-[600px] md:h-[600px]" style="width: 300px; height: 300px; animation-delay: 0s;"></div>
+                    <div class="absolute border border-stone-400/30 rounded-full animate-resonance-vivid hardware-accelerated md:w-[600px] md:h-[600px]" style="width: 300px; height: 300px; animation-delay: 2s;"></div>
+                </div>
+
+                <!-- Sumie Pines -->
+                <svg viewBox="0 0 100 200" class="absolute fill-none stroke-stone-900/40 pointer-events-none transition-all duration-[3000ms] top-[10%] left-[5%] md:top-[18%] md:left-[12%] animate-sway-pine hardware-accelerated" style="width: 80px; height: 160px; animation-delay: -2s; opacity: 0.4;">
+                    <path d="M50 200 Q48 150 50 100 Q52 50 50 10" stroke-width="0.8" stroke-dasharray="1 1"></path>
+                    <path d="M50 130 Q30 120 10 135" stroke-width="2.5" class="opacity-80" stroke-linecap="round"></path>
+                    <path d="M50 110 Q75 100 95 115" stroke-width="2.5" class="opacity-70" stroke-linecap="round"></path>
+                    <path d="M50 80 Q25 70 5 85" stroke-width="2" class="opacity-60" stroke-linecap="round"></path>
+                    <path d="M50 55 Q70 45 90 60" stroke-width="2" class="opacity-60" stroke-linecap="round"></path>
+                </svg>
+
+                <svg viewBox="0 0 100 200" class="absolute fill-none stroke-stone-900/30 pointer-events-none transition-all duration-[3000ms] top-[30%] right-[5%] md:top-[38%] md:right-[15%] animate-sway-pine hardware-accelerated" style="width: 70px; height: 140px; animation-delay: -1s; opacity: 0.3;">
+                    <path d="M50 200 Q48 150 50 100 Q52 50 50 10" stroke-width="0.8" stroke-dasharray="1 1"></path>
+                    <path d="M50 130 Q30 120 10 135" stroke-width="2.5" class="opacity-80" stroke-linecap="round"></path>
+                    <path d="M50 110 Q75 100 95 115" stroke-width="2.5" class="opacity-70" stroke-linecap="round"></path>
+                    <path d="M50 80 Q25 70 5 85" stroke-width="2" class="opacity-60" stroke-linecap="round"></path>
+                    <path d="M50 55 Q70 45 90 60" stroke-width="2" class="opacity-60" stroke-linecap="round"></path>
+                </svg>
+
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-stone-100/40 to-transparent animate-mist-slow hardware-accelerated pointer-events-none"></div>
+                <div class="absolute inset-0 opacity-[0.03] contrast-150 grayscale pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]"></div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto px-6 md:px-12 w-full relative z-10">
+                <div class="flex flex-col items-center text-center">
+                    <div class="mb-10 md:mb-16 opacity-40">
+                        <div class="w-px h-12 md:h-16 bg-stone-500 mx-auto animate-pulse"></div>
+                    </div>
+                    
+                    <h1 class="text-4xl md:text-[5.5rem] font-serif leading-tight text-stone-900 mb-8 md:mb-12 tracking-tighter">
+                        博士級の人文知を、<br>
+                        <span class="font-light italic opacity-90 transition-opacity duration-1000 hover:opacity-100 block md:inline mt-2 md:mt-0">実装可能な<br class="md:hidden">特許請求項へ。</span>
+                    </h1>
+                    
+                    <div class="max-w-2xl text-stone-600 text-xs md:text-sm leading-loose mb-12 md:mb-16 font-light tracking-widest px-4">
+                        AI時代の「責任・規範・合意」を実装可能な構造へと定式化する。<br class="hidden md:inline">
+                        人文学の専門知を権利と実証の断面へ接続する、<br class="hidden md:inline">
+                        GhostDrift数理研究所による知財化プログラム。
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-16 md:mb-20 w-full max-w-5xl relative">
+                        <div class="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                            <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated opacity-20" style="width: 400px; height: 400px; animation-delay: 0.5s;"></div>
+                        </div>
+                        
+                        <div class="p-6 md:p-8 border border-stone-200/60 bg-white/60 md:bg-white/40 backdrop-blur-md text-left transition-all hover:border-stone-900/20 group rounded-sm md:rounded-none shadow-sm md:shadow-none">
+                            <span class="text-[9px] font-bold text-stone-400 uppercase block mb-3 tracking-[0.2em]">Target</span>
+                            <p class="text-xs text-stone-900 font-serif leading-relaxed font-bold italic tracking-tight">博士課程／博士号レベルの<br>人文・社会科学専門知</p>
+                        </div>
+                        <div class="p-6 md:p-8 border border-stone-200/60 bg-white/60 md:bg-white/40 backdrop-blur-md text-left transition-all hover:border-stone-900/20 group rounded-sm md:rounded-none shadow-sm md:shadow-none">
+                            <span class="text-[9px] font-bold text-stone-400 uppercase block mb-3 tracking-[0.2em]">Output</span>
+                            <p class="text-xs text-stone-900 font-serif leading-relaxed font-bold italic tracking-tight">実装仕様まで落ちる請求項ドラフト<br>（独立1＋従属10想定）</p>
+                        </div>
+                        <div class="p-6 md:p-8 border border-stone-200/60 bg-white/60 md:bg-white/40 backdrop-blur-md text-left transition-all hover:border-stone-900/20 group rounded-sm md:rounded-none shadow-sm md:shadow-none">
+                            <span class="text-[9px] font-bold text-stone-400 uppercase block mb-3 tracking-[0.2em]">Evidence</span>
+                            <p class="text-xs text-stone-900 font-serif leading-relaxed font-bold italic tracking-tight">GhostDriftによる責任境界／基準ID固定／検証ログの運用実績</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                        <a 
+                            href="https://www.ghostdriftresearch.com/%E7%90%86%E7%B3%BB%E3%81%A8%E4%BA%BA%E6%96%87%E7%9F%A5%E3%81%AE%E5%A2%83%E7%95%8C%E7%B7%9A%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative text-[10px] font-bold tracking-[0.4em] text-stone-900 uppercase overflow-hidden py-2"
+                        >
+                            <span class="relative z-10">プログラム詳細を確認</span>
+                            <div class="h-px w-0 group-hover:w-full bg-stone-900 transition-all duration-700 mt-2"></div>
+                        </a>
+                        <div class="hidden md:block w-12 h-px bg-stone-300"></div>
+                        <a 
+                            href="https://www.ghostdriftresearch.com/%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-[10px] font-bold tracking-[0.4em] text-stone-400 uppercase hover:text-stone-900 transition-colors"
+                        >
+                            共同研究の問い合わせ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Example Section -->
+        <section id="examples" class="py-24 md:py-60 bg-[#F9F8F6] relative overflow-hidden border-y border-stone-100">
+            <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+                <div class="mb-16 md:mb-24 flex flex-col items-center text-center">
+                    <span class="text-[9px] font-bold tracking-[0.4em] md:tracking-[0.6em] text-stone-400 uppercase block mb-6 italic">Humanities → Patent: Working Examples</span>
+                    <h2 class="text-3xl md:text-4xl font-serif text-stone-900 mb-8 leading-tight">人文知から特許構造へ。</h2>
+                    <p class="max-w-3xl text-xs md:text-sm text-stone-500 font-light leading-relaxed font-serif px-2">
+                        これは「博士級の人文知 → 請求項（独立1＋従属10想定）→ Verify接続仕様」まで落ちることを示す実例です。<br class="hidden md:inline">
+                        同一の学問体系が、理論（定義・境界・失敗モード）と実装（監査・ログ・Verify）へ二系統で具現化します。
+                    </p>
+                </div>
+
+                <!-- Proof Strip -->
+                <div class="max-w-5xl mx-auto mb-16 md:mb-20">
+                    <div class="border border-stone-200/60 bg-white/50 backdrop-blur-sm p-6 md:p-10 relative overflow-hidden rounded-sm md:rounded-none">
+                        <div class="absolute top-0 right-0 opacity-5 hidden md:block">
+                            <div class="absolute border border-stone-400/30 rounded-full animate-resonance-vivid hardware-accelerated" style="width: 300px; height: 300px; animation-delay: 0s;"></div>
+                        </div>
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10 mb-8">
+                            <div class="text-left">
+                                <div class="text-[9px] font-bold tracking-[0.3em] md:tracking-[0.5em] text-stone-400 uppercase italic mb-3">
+                                    Patent-grade Output Shape
+                                </div>
+                                <div class="text-xs md:text-sm text-stone-700 font-light leading-relaxed font-serif italic">
+                                    下記の4点が「人文知→特許→実装」への最小成果物です<br class="md:hidden">（本文の例はこの型に沿っています）。
+                                </div>
+                            </div>
+                            <a 
+                                href="#cycle" 
+                                class="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-900 hover:gap-4 transition-all whitespace-nowrap mt-4 md:mt-0"
+                            >
+                                SEE THE CYCLE <i data-lucide="chevron-right" width="14"></i>
+                            </a>
+                        </div>
+                        <div class="mt-4 md:mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-px md:bg-stone-200 md:border md:border-stone-200">
+                            <!-- Item 1 -->
+                            <div class="bg-white/80 md:bg-white p-6 md:p-8 group hover:bg-stone-50 transition-colors border md:border-none border-stone-100 rounded-sm md:rounded-none">
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Claim Set</div>
+                                <div class="text-sm text-stone-900 font-serif font-bold leading-relaxed transition-all group-hover:pl-2 border-l-2 border-transparent group-hover:border-stone-900">
+                                    独立請求項1項 ＋ 従属請求項10項（実装仕様まで落ちる構成要件）
+                                </div>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="bg-white/80 md:bg-white p-6 md:p-8 group hover:bg-stone-50 transition-colors border md:border-none border-stone-100 rounded-sm md:rounded-none">
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Boundary Diagram</div>
+                                <div class="text-sm text-stone-900 font-serif font-bold leading-relaxed transition-all group-hover:pl-2 border-l-2 border-transparent group-hover:border-stone-900">
+                                    責任境界（Beacon）の固定：入力・出力・境界条件・失敗モード
+                                </div>
+                            </div>
+                            <!-- Item 3 -->
+                            <div class="bg-white/80 md:bg-white p-6 md:p-8 group hover:bg-stone-50 transition-colors border md:border-none border-stone-100 rounded-sm md:rounded-none">
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Criteria Lock</div>
+                                <div class="text-sm text-stone-900 font-serif font-bold leading-relaxed transition-all group-hover:pl-2 border-l-2 border-transparent group-hover:border-stone-900">
+                                    基準ID固定（Post-hoc Impossibility）＋ hash chain / ledger schema
+                                </div>
+                            </div>
+                            <!-- Item 4 -->
+                            <div class="bg-white/80 md:bg-white p-6 md:p-8 group hover:bg-stone-50 transition-colors border md:border-none border-stone-100 rounded-sm md:rounded-none">
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Verify Interface</div>
+                                <div class="text-sm text-stone-900 font-serif font-bold leading-relaxed transition-all group-hover:pl-2 border-l-2 border-transparent group-hover:border-stone-900">
+                                    第三者検証（Verify）に接続できる監査ログ断面（PoC接続仕様）
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 max-w-6xl mx-auto">
+                    <!-- Theory Example -->
+                    <div class="group relative bg-white/60 md:bg-white/40 backdrop-blur-sm border border-stone-200/60 p-8 md:p-12 transition-all duration-700 hover:bg-white hover:border-stone-900/20 rounded-sm md:rounded-none">
+                        <div class="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block">
+                            <i data-lucide="external-link" size="16" class="text-stone-300"></i>
+                        </div>
+                        <div class="text-[9px] font-bold text-stone-300 uppercase tracking-widest mb-6 italic tracking-tighter">【理論編】</div>
+                        <h3 class="text-2xl font-serif text-stone-900 mb-6 font-bold">ユング心理学の工学定式化</h3>
+                        <p class="text-sm text-stone-500 font-light leading-relaxed mb-10 font-serif">
+                            ユング心理学を、責任境界・評価基準・説明責任の工学要件として定式化した理論稿。
+                            高度な心理学的知見を、検証可能なアルゴリズムの構成要件へと昇華。
+                        </p>
+                        <a 
+                            href="https://ghostdrifttheory.github.io/jung-boundary-accountability/" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-900 hover:gap-4 transition-all underline underline-offset-8 decoration-stone-200 font-serif"
+                        >
+                            READ THEORY <i data-lucide="arrow-right" size="14"></i>
+                        </a>
+                    </div>
+
+                    <!-- Implementation Example -->
+                    <div class="group relative bg-white/60 md:bg-white/40 backdrop-blur-sm border border-stone-200/60 p-8 md:p-12 transition-all duration-700 hover:bg-white hover:border-stone-900/20 rounded-sm md:rounded-none">
+                        <div class="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block">
+                            <i data-lucide="external-link" size="16" class="text-stone-300"></i>
+                        </div>
+                        <div class="text-[9px] font-bold text-stone-300 uppercase tracking-widest mb-6 italic tracking-tighter">【実装編】</div>
+                        <h3 class="text-2xl font-serif text-stone-900 mb-6 font-bold">ADIC 監査の実装デモ</h3>
+                        <p class="text-sm text-stone-500 font-light leading-relaxed mb-10 font-serif">
+                            同じ枠組みを用いて構築された、電力需要予測に対する ADIC 監査の実装デモ。
+                            実証実験用ダッシュボードと監査スキームの統合。
+                        </p>
+                        <div class="space-y-6">
+                            <a 
+                                href="https://ghostdrifttheory.github.io/ghostdrift-adic-audit/" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-900 hover:gap-4 transition-all underline underline-offset-8 decoration-stone-200 font-serif"
+                            >
+                                VIEW DEMO <i data-lucide="arrow-right" size="14"></i>
+                            </a>
+                            <div class="pt-8 border-t border-stone-100 font-serif">
+                                <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Filed Patents (Evidence)</span>
+                                <div class="mt-3 text-[11px] font-mono text-stone-900 font-bold bg-stone-50 p-3 md:p-2 border-l-2 border-stone-900">
+                                    特願2025-201777 / 特願2025-202403
+                                </div>
+                                <div class="mt-4 text-[11px] text-stone-600 font-light leading-relaxed italic">
+                                    発明の核：責任境界（Beacon）＋基準ID固定（Post-hoc Impossibility）＋第三者検証ログ（Verify接続）を満たす監査プロトコルの構造。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA: proof-first route -->
+                <div class="max-w-5xl mx-auto mt-16 md:mt-24 text-center">
+                    <div class="inline-flex flex-col items-center gap-6 border border-stone-200/60 bg-white/60 md:bg-white/40 backdrop-blur-sm px-8 md:px-16 py-10 md:py-12 relative w-full md:w-auto rounded-sm md:rounded-none">
+                        <div class="text-[9px] font-bold tracking-[0.5em] md:tracking-[0.7em] text-stone-400 uppercase italic mb-2">
+                            Proof First
+                        </div>
+                        <div class="text-sm text-stone-700 font-light font-serif mb-4">
+                            「人文知が特許になる」の実例を先に見る。
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 w-full font-serif">
+                            <a 
+                                href="https://ghostdrifttheory.github.io/jung-boundary-accountability/" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-3 text-[10px] font-bold tracking-[0.2em] text-stone-900 group"
+                            >
+                                OPEN THEORY <i data-lucide="external-link" size="14" class="group-hover:scale-110 transition-transform"></i>
+                            </a>
+                            <div class="hidden md:block w-px h-6 bg-stone-200"></div>
+                            <div class="md:hidden w-12 h-px bg-stone-200"></div>
+                            <a 
+                                href="https://ghostdrifttheory.github.io/ghostdrift-adic-audit/" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-3 text-[10px] font-bold tracking-[0.2em] text-stone-900 group"
+                            >
+                                OPEN DEMO <i data-lucide="external-link" size="14" class="group-hover:scale-110 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Cycle -->
+        <section id="cycle" class="py-24 md:py-60 bg-white relative overflow-hidden">
+            <!-- Atmosphere (Re-used for section) -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden bg-[#F9F8F6]">
+                 <div class="absolute top-[10%] left-[5%] md:top-[20%] md:left-[15%]">
+                    <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated md:w-[120px] md:h-[120px]" style="width: 80px; height: 80px; animation-delay: 1s;"></div>
+                </div>
+                <div class="absolute bottom-[20%] right-[10%] md:bottom-[30%] md:right-[20%]">
+                    <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated md:w-[180px] md:h-[180px]" style="width: 100px; height: 100px; animation-delay: 0s;"></div>
+                </div>
+                <div class="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2">
+                    <div class="absolute border border-stone-400/30 rounded-full animate-resonance-vivid hardware-accelerated md:w-[600px] md:h-[600px]" style="width: 300px; height: 300px; animation-delay: 0s;"></div>
+                    <div class="absolute border border-stone-400/30 rounded-full animate-resonance-vivid hardware-accelerated md:w-[600px] md:h-[600px]" style="width: 300px; height: 300px; animation-delay: 2s;"></div>
+                </div>
+                 <svg viewBox="0 0 100 200" class="absolute fill-none stroke-stone-900/40 pointer-events-none transition-all duration-[3000ms] top-[10%] left-[5%] md:top-[18%] md:left-[12%] animate-sway-pine hardware-accelerated" style="width: 80px; height: 160px; animation-delay: -2s; opacity: 0.4;">
+                    <path d="M50 200 Q48 150 50 100 Q52 50 50 10" stroke-width="0.8" stroke-dasharray="1 1"></path>
+                    <path d="M50 130 Q30 120 10 135" stroke-width="2.5" class="opacity-80" stroke-linecap="round"></path>
+                    <path d="M50 110 Q75 100 95 115" stroke-width="2.5" class="opacity-70" stroke-linecap="round"></path>
+                </svg>
+                 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-stone-100/40 to-transparent animate-mist-slow hardware-accelerated pointer-events-none"></div>
+                <div class="absolute inset-0 opacity-[0.03] contrast-150 grayscale pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')]"></div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+                <div class="mb-16 md:mb-32 flex flex-col items-center text-center">
+                    <span class="text-[9px] font-bold tracking-[0.4em] md:tracking-[0.6em] text-stone-400 uppercase block mb-6 italic">Framework: GhostDrift Process</span>
+                    <h2 class="text-3xl md:text-4xl font-serif text-stone-900 mb-6 md:mb-8 font-bold">知の4段階サイクル</h2>
+                    <p class="max-w-2xl text-xs md:text-sm text-stone-500 font-light leading-relaxed font-serif px-2">
+                        人文学の着想を数理化・実装し、社会価値へと変換する<br class="hidden md:inline">
+                        GhostDrift数理研究所の核心プロセス。
+                    </p>
+                </div>
+
+                <!-- Mobile View: Vertical Stack -->
+                <div class="flex flex-col gap-6 md:hidden">
+                    <div class="p-6 bg-white/90 border border-stone-100 rounded-sm text-center">
+                       <div class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-2">Ultimate Goal</div>
+                       <div class="text-lg font-serif text-stone-900 font-bold mb-1">意味の探索を社会実装へ</div>
+                    </div>
+                    
+                    <div class="p-6 bg-white/80 border border-stone-100 rounded-sm">
+                        <span class="text-[10px] font-mono text-blue-600 font-bold mb-2 block tracking-widest uppercase">01 / Insight</span>
+                        <h3 class="text-lg font-serif text-stone-900 mb-2 font-bold">雑談・会話・着想</h3>
+                        <p class="text-xs text-stone-500 font-light leading-relaxed">直感や比喩、違和感をそのまま保持し、知の源泉とする。</p>
+                    </div>
+                    <div class="p-6 bg-white/80 border border-stone-100 rounded-sm">
+                        <span class="text-[10px] font-mono text-blue-600 font-bold mb-2 block tracking-widest uppercase">02 / Theory</span>
+                        <h3 class="text-lg font-serif text-stone-900 mb-2 font-bold">プロとの対話で数理化</h3>
+                        <p class="text-xs text-stone-500 font-light leading-relaxed">AIとの対話を通じ、反証可能な定義へと落とし込む。</p>
+                    </div>
+                    <div class="p-6 bg-white/80 border border-stone-100 rounded-sm">
+                        <span class="text-[10px] font-mono text-blue-600 font-bold mb-2 block tracking-widest uppercase">03 / Implementation</span>
+                        <h3 class="text-lg font-serif text-stone-900 mb-2 font-bold">工学実装</h3>
+                        <p class="text-xs text-stone-500 font-light leading-relaxed">特許や実装で、再現可能な社会価値へ変換する。</p>
+                    </div>
+                    <div class="p-6 bg-white/80 border border-stone-100 rounded-sm">
+                        <span class="text-[10px] font-mono text-blue-600 font-bold mb-2 block tracking-widest uppercase">04 / Growth</span>
+                        <h3 class="text-lg font-serif text-stone-900 mb-2 font-bold">情報発信</h3>
+                        <p class="text-xs text-stone-500 font-light leading-relaxed">公開により参加者を増やし、次サイクルの素材とする。</p>
+                    </div>
+                </div>
+
+                <!-- Desktop View: Cycle Diagram -->
+                <div class="hidden md:block relative h-[600px] max-w-6xl mx-auto">
+                    <!-- Center Hub -->
+                    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                        <div class="w-80 h-80 rounded-full bg-white border border-stone-900/10 shadow-2xl flex flex-col items-center justify-center text-center p-8 backdrop-blur-md">
+                            <div class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-4">Ultimate Goal</div>
+                            <div class="text-xl font-serif text-stone-900 mb-2 font-bold tracking-tighter leading-tight italic">意味の探索を<br>社会実装へ接続</div>
+                            <div class="text-[10px] text-stone-400 font-light italic">Insight → Math → Eng → Public</div>
+                        </div>
+                         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated" style="width: 400px; height: 400px; animation-delay: 0s;"></div>
+                    </div>
+
+                    <!-- Cycle Steps -->
+                    <div class="grid grid-cols-2 gap-12 h-full relative z-10 font-serif">
+                        
+                        <div class="flex justify-start self-start">
+                            <div class="w-80 p-8 border border-stone-100 bg-white/90 backdrop-blur-sm relative group hover:border-stone-900/20 transition-all">
+                                <span class="text-[10px] font-mono text-blue-600 font-bold mb-4 block tracking-widest uppercase">01 / Insight</span>
+                                <h3 class="text-xl font-serif text-stone-900 mb-3 font-bold">雑談・会話・着想</h3>
+                                <p class="text-xs text-stone-500 font-light leading-relaxed mb-3">直感や比喩、違和感をそのまま保持し、知の源泉とする。</p>
+                                <p class="text-[10px] text-stone-300 font-light italic">Capture raw intuition as creative material.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end self-start">
+                             <div class="w-80 p-8 border border-stone-100 bg-white/90 backdrop-blur-sm relative group hover:border-stone-900/20 transition-all">
+                                <span class="text-[10px] font-mono text-blue-600 font-bold mb-4 block tracking-widest uppercase">02 / Theory</span>
+                                <h3 class="text-xl font-serif text-stone-900 mb-3 font-bold">プロとの対話で数理化</h3>
+                                <p class="text-xs text-stone-500 font-light leading-relaxed mb-3">AIとの対話を通じ、反証可能な定義へと落とし込む。</p>
+                                <p class="text-[10px] text-stone-300 font-light italic">Translate concepts into rigorous definitions.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-start self-end">
+                            <div class="w-80 p-8 border border-stone-100 bg-white/90 backdrop-blur-sm relative group hover:border-stone-900/20 transition-all">
+                                <span class="text-[10px] font-mono text-blue-600 font-bold mb-4 block tracking-widest uppercase">04 / Growth</span>
+                                <h3 class="text-xl font-serif text-stone-900 mb-3 font-bold">情報発信</h3>
+                                <p class="text-xs text-stone-500 font-light leading-relaxed mb-3">公開により参加者を増やし、次サイクルの素材とする。</p>
+                                <p class="text-[10px] text-stone-300 font-light italic">Expand network through public resonance.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end self-end">
+                            <div class="w-80 p-8 border border-stone-100 bg-white/90 backdrop-blur-sm relative group hover:border-stone-900/20 transition-all">
+                                <span class="text-[10px] font-mono text-blue-600 font-bold mb-4 block tracking-widest uppercase">03 / Implementation</span>
+                                <h3 class="text-xl font-serif text-stone-900 mb-3 font-bold">工学実装</h3>
+                                <p class="text-xs text-stone-500 font-light leading-relaxed mb-3">特許や実装で、再現可能な社会価値へ変換する。</p>
+                                <p class="text-[10px] text-stone-300 font-light italic">Transform theory into reproducible value.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <svg class="absolute inset-0 pointer-events-none w-full h-full opacity-10" viewBox="0 0 1000 600">
+                        <path d="M400,100 Q500,50 600,100" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 5" class="text-blue-500"></path>
+                        <path d="M800,250 Q850,300 800,350" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 5" class="text-blue-500"></path>
+                        <path d="M600,500 Q500,550 400,500" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 5" class="text-blue-500"></path>
+                        <path d="M200,350 Q150,300 200,250" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 5" class="text-blue-500"></path>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Section -->
+        <section class="py-24 md:py-60 bg-white relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 md:px-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-32 relative z-10 mb-24 md:mb-48">
+                    <!-- Feature 1 -->
+                    <div class="relative group text-center md:text-left">
+                        <div class="mb-6 md:mb-12 opacity-50 md:opacity-30 group-hover:opacity-100 transition-all duration-1000 md:group-hover:translate-y-[-4px] inline-block md:block">
+                             <i data-lucide="lock" size="28" stroke-width="1" class="text-stone-900"></i>
+                        </div>
+                        <h3 class="text-xl font-serif text-stone-900 mb-4 md:mb-6 font-bold">責任境界の固定</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed font-light tracking-wider font-serif">曖昧な倫理概念を「Beacon」として定義。責任が帰属する技術的境界を明文化します。</p>
+                    </div>
+                     <!-- Feature 2 -->
+                    <div class="relative group text-center md:text-left">
+                        <div class="mb-6 md:mb-12 opacity-50 md:opacity-30 group-hover:opacity-100 transition-all duration-1000 md:group-hover:translate-y-[-4px] inline-block md:block">
+                             <i data-lucide="database" size="28" stroke-width="1" class="text-stone-900"></i>
+                        </div>
+                        <h3 class="text-xl font-serif text-stone-900 mb-4 md:mb-6 font-bold">基準IDの固定化</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed font-light tracking-wider font-serif">Post-hoc Impossibility（事後の基準改変阻止）に基づき、合意形成のログ構造を設計。</p>
+                    </div>
+                     <!-- Feature 3 -->
+                    <div class="relative group text-center md:text-left">
+                        <div class="mb-6 md:mb-12 opacity-50 md:opacity-30 group-hover:opacity-100 transition-all duration-1000 md:group-hover:translate-y-[-4px] inline-block md:block">
+                             <i data-lucide="shield-check" size="28" stroke-width="1" class="text-stone-900"></i>
+                        </div>
+                        <h3 class="text-xl font-serif text-stone-900 mb-4 md:mb-6 font-bold">第三者検証ログ</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed font-light tracking-wider font-serif">監査可能な透明性を確保。ledger / Verify への接続を見据えたログ設計を特許化します。</p>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto border-t border-stone-100 pt-16 md:pt-24 relative">
+                    <div class="hidden md:block">
+                         <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated top-0 left-0 -translate-x-1/2 opacity-30" style="width: 300px; height: 300px; animation-delay: 0s;"></div>
+                    </div>
+                    
+                    <div class="text-center mb-10 md:mb-16">
+                        <span class="text-[9px] font-bold tracking-[0.4em] md:tracking-[0.5em] text-stone-400 uppercase block mb-4 italic font-serif">Deliverable Format</span>
+                        <h2 class="text-2xl md:text-3xl font-serif text-stone-900 font-bold">知財資産としての成果物</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-px md:bg-stone-200 border-none md:border md:border-stone-200 md:shadow-2xl md:shadow-stone-900/5 font-serif">
+                        
+                        <div class="bg-white/90 md:bg-white p-6 md:p-12 flex items-center justify-between group hover:bg-stone-50 transition-all duration-700 border border-stone-100 md:border-none rounded-sm md:rounded-none">
+                            <div>
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Claim Set</div>
+                                <div class="text-sm md:text-base text-stone-900 font-serif font-bold italic tracking-tight">独立請求項1項 ＋ 従属請求項10項の構成</div>
+                            </div>
+                            <i data-lucide="chevron-right" size="18" class="text-stone-200 group-hover:text-stone-900 transition-all"></i>
+                        </div>
+
+                        <div class="bg-white/90 md:bg-white p-6 md:p-12 flex items-center justify-between group hover:bg-stone-50 transition-all duration-700 border border-stone-100 md:border-none rounded-sm md:rounded-none">
+                            <div>
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Res. Diagram</div>
+                                <div class="text-sm md:text-base text-stone-900 font-serif font-bold italic tracking-tight">責任境界図（Beacon）の構造定義</div>
+                            </div>
+                             <i data-lucide="chevron-right" size="18" class="text-stone-200 group-hover:text-stone-900 transition-all"></i>
+                        </div>
+
+                        <div class="bg-white/90 md:bg-white p-6 md:p-12 flex items-center justify-between group hover:bg-stone-50 transition-all duration-700 border border-stone-100 md:border-none rounded-sm md:rounded-none">
+                            <div>
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">Criteria Lock</div>
+                                <div class="text-sm md:text-base text-stone-900 font-serif font-bold italic tracking-tight">基準ID固定 ＋ Ledger Schema設計</div>
+                            </div>
+                             <i data-lucide="chevron-right" size="18" class="text-stone-200 group-hover:text-stone-900 transition-all"></i>
+                        </div>
+
+                        <div class="bg-white/90 md:bg-white p-6 md:p-12 flex items-center justify-between group hover:bg-stone-50 transition-all duration-700 border border-stone-100 md:border-none rounded-sm md:rounded-none">
+                            <div>
+                                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">PoC Interface</div>
+                                <div class="text-sm md:text-base text-stone-900 font-serif font-bold italic tracking-tight">Verify準拠の実装用インターフェース仕様</div>
+                            </div>
+                             <i data-lucide="chevron-right" size="18" class="text-stone-200 group-hover:text-stone-900 transition-all"></i>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Concept Section -->
+        <section id="concept" class="py-24 md:py-60 bg-[#F9F8F6] relative overflow-hidden">
+            <div class="absolute top-0 right-0 opacity-10 hidden md:block">
+                 <div class="absolute border border-stone-400/60 rounded-full animate-resonance-vivid hardware-accelerated" style="width: 800px; height: 800px; animation-delay: 0s;"></div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto px-6 md:px-12">
+                <div class="flex flex-col md:flex-row gap-16 md:gap-40 items-center">
+                    <div class="flex-1 space-y-12 md:space-y-24 w-full">
+                        <div class="text-center md:text-left">
+                            <span class="text-[9px] font-bold tracking-[0.4em] md:tracking-[0.5em] text-stone-400 uppercase block mb-6 md:mb-8 italic tracking-tighter">Structuralize</span>
+                            <h2 class="text-3xl md:text-4xl font-serif text-stone-900 leading-snug tracking-tighter font-bold">解釈を排し、<br>構造を記述する。</h2>
+                        </div>
+                        
+                        <div class="space-y-8 md:space-y-16">
+                            <div class="max-w-sm group mx-auto md:mx-0">
+                                <h3 class="text-sm font-bold text-stone-900 mb-4 tracking-widest border-l-2 border-transparent md:group-hover:border-stone-900 pl-0 md:group-hover:pl-6 transition-all duration-700 font-serif">数理モデルへの置換</h3>
+                                <p class="text-xs text-stone-500 font-light leading-relaxed font-serif">哲学的な「責任」を、入力・出力・失敗モードが定義された工学的なモジュールに変換。</p>
+                            </div>
+                            <div class="max-w-sm group mx-auto md:mx-0">
+                                <h3 class="text-sm font-bold text-stone-900 mb-4 tracking-widest border-l-2 border-transparent md:group-hover:border-stone-900 pl-0 md:group-hover:pl-6 transition-all duration-700 font-serif">権利化による保護</h3>
+                                <p class="text-xs text-stone-500 font-light leading-relaxed font-serif">高度な専門知を論文の枠に留めず、システムの構成要件として再定義し、特許権による保護を目指します。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 relative flex justify-center w-full">
+                        <!-- 修正: モバイルで横幅いっぱいになりすぎないよう調整 (w-full max-w-sm) -->
+                        <a href="https://ghostdrifttheory.github.io/ghostdrift-responsibility-ledger/" target="_blank" rel="noopener noreferrer" class="group w-full max-w-sm h-96 md:w-80 md:h-[500px] relative border border-stone-200 flex flex-col items-center justify-center overflow-hidden bg-white/20 backdrop-blur-sm hover:border-stone-900/30 transition-all duration-700 cursor-pointer">
+                            <div class="absolute inset-0 bg-gradient-to-t from-stone-200/50 to-transparent group-hover:from-stone-200/80 transition-all duration-700"></div>
+                            <div class="absolute inset-0 animate-resonance-vivid hardware-accelerated border border-stone-300/10 rounded-full scale-150"></div>
+                            
+                            <!-- Icon -->
+                            <i data-lucide="layers" size="48" class="md:w-16 md:h-16 text-stone-400 group-hover:text-stone-600 transition-colors relative z-10 mb-8"></i>
+                            
+                            <!-- Text/Button Area -->
+                            <div class="relative z-10 text-center px-6">
+                                <span class="text-[9px] font-bold tracking-[0.2em] text-stone-400 uppercase block mb-2">Corporate PoC</span>
+                                <span class="text-xs md:text-sm font-serif text-stone-600 font-bold block mb-6 group-hover:text-stone-900 transition-colors">社会実装に向けた<br>企業実証モデル</span>
+                                
+                                <div class="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-stone-900 border border-stone-300 px-4 py-2 bg-white/50 group-hover:bg-stone-900 group-hover:text-white group-hover:border-stone-900 transition-all uppercase">
+                                    View Ledger System
+                                    <i data-lucide="arrow-right" size="12"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Closing CTA -->
+        <section class="py-32 md:py-80 bg-white relative overflow-hidden">
+            <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+                <div class="w-[300px] h-[300px] md:w-[1000px] md:h-[1000px] border border-stone-900 rounded-full animate-resonance-vivid hardware-accelerated"></div>
+                <div class="absolute border border-stone-400/30 rounded-full animate-water-ripple hardware-accelerated opacity-40" style="width: 200px; height: 200px; animation-delay: 2s;"></div>
+            </div>
+
+            <div class="max-w-2xl mx-auto px-6 md:px-12 text-center relative z-10">
+                <div class="text-[9px] font-bold tracking-[0.5em] md:tracking-[1em] text-stone-400 uppercase mb-12 md:mb-20 italic font-bold font-serif">The Encounter</div>
+                <h2 class="text-3xl md:text-4xl font-serif text-stone-900 mb-12 md:mb-20 leading-relaxed italic font-light tracking-tighter">
+                    風と、数理。<br>
+                    <span class="font-bold">共鳴する、博士の知。</span>
+                </h2>
+                <a 
+                    href="https://www.ghostdriftresearch.com/%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-10 md:px-20 py-6 md:py-8 border border-stone-900 text-stone-900 font-bold text-[10px] md:text-[11px] tracking-[0.3em] md:tracking-[0.6em] uppercase hover:bg-stone-900 hover:text-white transition-all duration-[1200ms] shadow-sm bg-white/50 backdrop-blur-sm shadow-2xl inline-block"
+                >
+                    共同研究の相談を申し込む
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-24 md:py-32 bg-[#F9F8F6] border-t border-stone-200 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 text-center relative z-10">
+            <div class="mb-12 md:mb-16">
+                <div class="w-px h-12 md:h-16 bg-stone-300 mx-auto mb-6 md:mb-8"></div>
+                <p class="text-[10px] md:text-xs text-stone-400 tracking-[0.4em] md:tracking-[0.6em] uppercase font-light">
+                    Resonance in the Void
+                </p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12 pt-12 border-t border-stone-200">
+                <div class="font-serif tracking-widest text-xs uppercase opacity-80 font-bold text-stone-900 underline decoration-stone-200 underline-offset-8 font-bold">GhostDrift MI</div>
+                <div class="flex flex-col md:flex-row gap-6 md:gap-12 text-[10px] text-stone-500 font-bold uppercase tracking-[0.3em] font-serif">
+                    <a href="https://www.ghostdriftresearch.com/%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" target="_blank" rel="noopener noreferrer" class="hover:text-stone-900 transition-colors">Contact</a>
+                    <a href="https://www.ghostdriftresearch.com/%E7%90%86%E7%B3%BB%E3%81%A8%E4%BA%BA%E6%96%87%E7%9F%A5%E3%81%AE%E5%A2%83%E7%95%8C%E7%B7%9A%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" target="_blank" rel="noopener noreferrer" class="hover:text-stone-900 transition-colors">Research Portfolio</a>
+                </div>
+                <div class="text-[9px] text-stone-400 font-mono tracking-tighter">
+                    © 2024 GMI. ALL PHENOMENA ARE MODELLED.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+
+        // Mobile Menu Logic
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconMenu = document.getElementById('icon-menu');
+        const iconClose = document.getElementById('icon-close');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+        let isMenuOpen = false;
+
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                mobileMenu.classList.remove('mobile-menu-hidden');
+                mobileMenu.classList.add('mobile-menu-visible');
+                iconMenu.classList.add('hidden');
+                iconClose.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+            } else {
+                mobileMenu.classList.remove('mobile-menu-visible');
+                mobileMenu.classList.add('mobile-menu-hidden');
+                iconMenu.classList.remove('hidden');
+                iconClose.classList.add('hidden');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+
+        // Close menu when a link is clicked
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (isMenuOpen) toggleMenu();
+            });
+        });
+    </script>
+</body>
+</html>
