@@ -105,4 +105,4 @@ This approach is substantiated by the following filed patents and implementation
 
 [https://ghostdrifttheory.github.io/ghostdrift-humanities-ip-program/](https://ghostdrifttheory.github.io/ghostdrift-humanities-ip-program/)
 
-© 2024 GhostDrift Mathematical Institute. ALL PHENOMENA ARE MODELLED.
+© 2025 GhostDrift Mathematical Institute. ALL PHENOMENA ARE MODELLED.
