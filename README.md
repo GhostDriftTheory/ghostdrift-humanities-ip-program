@@ -4,6 +4,9 @@
 
 A research program transforming humanities knowledge into engineering modules of "Liability, Norms, and Consensus," formulated as implementable patent claims.
 
+🌐 GhostDrift Mathematical Institute (Official)
+[https://www.ghostdriftresearch.com/](https://www.ghostdriftresearch.com/)
+
 ## **1\. Introduction: Why Humanities Knowledge Fails to Implement**
 
 In the age of automated decision-making, humanities concepts like "ethics" and "responsibility" are critical yet functionally impotent. Remaining as "interpretations" or "discussions," they fail to connect with algorithmic implementation specifications. This disconnection enables **Post-hoc Impossibility** violations: evaluation criteria are modified after an outcome is observed, making responsibility non-assignable.
